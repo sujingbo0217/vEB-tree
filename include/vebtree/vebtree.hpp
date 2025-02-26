@@ -23,7 +23,7 @@ struct node_t {
   size_t min_v;
   size_t max_v;
   std::vector<bool> occupy;  // summary
-  std::vector<std::shared_ptr<node_t<T>>> cluster;
+  std::vector<std::unique_ptr<node_t<T>>> cluster;
 
   explicit node_t(size_t n) : u(n) {
     if (n == 2) return;
@@ -31,7 +31,7 @@ struct node_t {
     occupy.resize(m);
     cluster.resize(m);
     for (auto &it : cluster) {
-      it = std::make_shared<node_t<T>>(m);
+      it = std::make_unique<node_t<T>>(m);
     }
   }
 };
@@ -51,11 +51,11 @@ class vEBTree {
   T pred(T x) const;
 
  private:
-  void _build(const std::shared_ptr<node_t<T>> &root);
-  bool _insert(const std::shared_ptr<node_t<T>> &node, T x);
-  T _find(const std::shared_ptr<node_t<T>> &node, T x) const;
-  T _successor(const std::shared_ptr<node_t<T>> &node, T x) const;
-  T _predecessor(const std::shared_ptr<node_t<T>> &node, T x) const;
+  void _build(const std::unique_ptr<node_t<T>> &root);
+  bool _insert(const std::unique_ptr<node_t<T>> &node, T x);
+  T _find(const std::unique_ptr<node_t<T>> &node, T x) const;
+  T _successor(const std::unique_ptr<node_t<T>> &node, T x) const;
+  T _predecessor(const std::unique_ptr<node_t<T>> &node, T x) const;
 
   std::pair<T, T> _split(T v, size_t u) const {
     size_t offset = 1ULL << (static_cast<size_t>(std::log2(u) / 2));
@@ -73,7 +73,7 @@ class vEBTree {
 
  private:
   size_t _n;
-  std::shared_ptr<node_t<T>> _root;
+  std::unique_ptr<node_t<T>> _root;
   size_t NIL;
 };
 
