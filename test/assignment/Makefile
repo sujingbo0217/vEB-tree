@@ -1,17 +1,13 @@
-all: test test_vebtree
+all: test
 
 CC = g++
-OPT= -g -flto -Ofast
+OPT = -g -flto -Ofast -std=c++17
 CFLAGS = $(OPT) -Wall -march=native
 LIBS = -lssl -lcrypto
 DEBUG = -DDEBUG_OUTPUT
 
-test: test.cc
-	$(CC) $(CFLAGS) $^ -o $@ $(LIBS)
-
-test_vebtree: test_vebtree.cc
-	$(CC) $(CFLAGS) $^ -o $@ $(LIBS) $(DEBUG)
+test: test.cc	../../source/vebtree/vebtree.cpp
+	$(CC) $(CFLAGS) test.cc ../../source/vebtree/vebtree.cpp -o test $(LIBS)
 
 clean:
 	rm -f test test.o
-	rm -f test_vebtree*
