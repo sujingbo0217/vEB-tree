@@ -9,30 +9,36 @@
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
-#include <cstdio>
 #include <iostream>
 #include <limits>
 #include <memory>
+#include <optional>
 #include <vector>
 
 namespace vebtree {
 
 template<typename T>
 struct node_t {
-  size_t u;  // universe size
-  size_t min_v;
-  size_t max_v;
-  std::vector<bool> occupy;  // summary
-  std::vector<std::unique_ptr<node_t<T>>> cluster;
+  size_t u;  // universe size 8 -> 0
+  std::optional<T> min_v; // 8 -> 4
+  std::optional<T> max_v; // 8 -> 4
+  std::unique_ptr<node_t<T>> summary; // 8 -> (0)
+  std::vector<std::unique_ptr<node_t<T>>> cluster;  // TODO: optimize using hash table 24
+  // std::unique_ptr<std::unique_ptr<node_t<T>>[]> cluster(n); 8
+  
+  // unique_ptr<char> p;
+  // char* ip;
+  // ip = new char[10];
+  // auto p = std::make_unique_for_overwirte<node_t<T>[]>(n);
 
-  explicit node_t(size_t n) : u(n) {
-    if (n == 2) return;
-    size_t m = static_cast<size_t>(std::sqrt(n));
-    occupy.resize(m);
+  explicit node_t(size_t n) : u(n), min_v(std::nullopt), max_v(std::nullopt) {
+    if (n <= 2) return;
+    size_t m = static_cast<size_t>(std::sqrt(n)); // 1 << (u / 2)
+    summary = nullptr;
     cluster.resize(m);
-    for (auto &it : cluster) {
-      it = std::make_unique<node_t<T>>(m);
-    }
+    // for (auto &it : cluster) {
+    //   it = std::make_unique<node_t<T>>(m);
+    // }
   }
 };
 
@@ -45,36 +51,26 @@ class vEBTree {
   ~vEBTree() = default;
 
  public:
-  bool insert(T x);
-  T find(T x) const;
-  T succ(T x) const;
-  T pred(T x) const;
+  void insert(T x);
+  void remove(T x);
+  bool find(T x) const;
+  std::optional<T> successor(T x, bool lower_bound = false) const;
+  std::optional<T> predecessor(T x) const;
 
  private:
-  void _build(const std::unique_ptr<node_t<T>> &root);
-  bool _insert(const std::unique_ptr<node_t<T>> &node, T x);
-  T _find(const std::unique_ptr<node_t<T>> &node, T x) const;
-  T _successor(const std::unique_ptr<node_t<T>> &node, T x) const;
-  T _predecessor(const std::unique_ptr<node_t<T>> &node, T x) const;
-
-  std::pair<T, T> _split(T v, size_t u) const {
-    size_t offset = 1ULL << (static_cast<size_t>(std::log2(u) / 2));
-    T high = static_cast<T>(v / offset);
-    T low = v % static_cast<T>(offset);
-    // T high = static_cast<T>(v / std::sqrt(u));
-    // T low = v % static_cast<T>(std::sqrt(u));
+  inline std::pair<T, T> _split(T v, size_t u) const {
+    T high = static_cast<T>(v / std::sqrt(u));
+    T low = v % static_cast<T>(std::sqrt(u));
     return std::make_pair(high, low);
   }
 
-  T _combine(T high, T low, size_t u) const {
-    size_t offset = 1ULL << (static_cast<size_t>(std::log2(u) / 2));
-    return high * offset + low;
+  inline T _combine(T high, T low, size_t u) const {
+    return high * static_cast<T>(std::sqrt(u)) + low;
   }
 
  private:
   size_t _n;
   std::unique_ptr<node_t<T>> _root;
-  size_t NIL;
 };
 
 }  // namespace vebtree
