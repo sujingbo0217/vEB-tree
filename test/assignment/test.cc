@@ -37,8 +37,6 @@ int main(int argc, char** argv) {
 	uint32_t N = atoi(argv[1]); 	// number of items
 	bool test = argv[2];
 
-	std::cout << test << std::endl;
-
 	// Generate N numbers to insert
 	uint32_t *in_numbers = (uint32_t *)malloc(N * sizeof(uint32_t));
 	if(!in_numbers) {
@@ -256,12 +254,12 @@ int main(int argc, char** argv) {
 	// N Successor queries from out_numbers
 	t1 = high_resolution_clock::now();
 	for (uint32_t i = 0; i < N; ++i) {
-		auto res = vebtree.successor(out_numbers[i]);
-		if (res.has_value() && res != bst_succ[i]) {
-			std::cout << "successor query in vEB-tree failed. Item: " + std::to_string(out_numbers[i]) + " Successor: " + std::to_string(*res) << std::endl;
+		uint32_t res = vebtree.successor(out_numbers[i] - 1);
+		if ((res != (uint32_t)-1 && res != bst_succ[i]) || (res == (uint32_t)-1 && bst_succ[i] != 0)) {
+			std::cout << "successor query in vEB-tree failed. Item: " + std::to_string(out_numbers[i]) + " Successor: " + std::to_string(res) << std::endl;
 			// printf("successor query in vEB-tree failed. Item: %u Successor: %u\n", out_numbers[i], res.value());
 			// fflush(stdout);
-			std::cout << "Successor should be: " + std::to_string(bst_succ[i]) << ", res: " << *res << std::endl;
+			std::cout << "Successor should be: " + std::to_string(bst_succ[i]) << ", res: " << res << std::endl;
 			// printf("Successor should be: %u, res: %u\n", bst_succ[i], res.value());
 			// fflush(stdout);
 			// std::cerr << (vebtree.find(res)) << " & " << (bst.find(res) != bst.end()) << std::endl;
@@ -280,13 +278,6 @@ int main(int argc, char** argv) {
 				}
 				fout.close();
 			}
-			exit(1);
-		} else
-		if (res == std::nullopt && bst_succ[i] != 0) {
-			std::cout << "Still wrong!" << std::endl;
-			std::cout << "Correct result is: " << bst_succ[i] << std::endl;
-			// printf("Still wrong!\nCorrect answer is: %u\n", bst_succ[i]);
-			// fflush(stdout);
 			exit(1);
 		}
 	}
