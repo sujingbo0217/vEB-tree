@@ -1,7 +1,7 @@
 all: test
 
 CC = g++
-OPT = -g -flto -Ofast -std=c++17
+OPT = -g -flto -Ofast -std=c++20
 CFLAGS = $(OPT) -Wall -march=native
 LIBS = -lssl -lcrypto
 DEBUG = -DDEBUG_OUTPUT

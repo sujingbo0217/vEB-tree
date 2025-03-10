@@ -1,6 +1,6 @@
 /**
  *  Author: Bob
- *  Van Emde Boas Tree
+ *  van Emde Boas Tree
  **/
 
 #ifndef __VEBTREE_HPP__
@@ -19,14 +19,7 @@ namespace vebtree {
 
 template<typename T>
 struct node_t {
-  // size_t u;  // universe size 8 -> 0
-  // std::optional<T> min_v; // 8 -> 4
-  // std::optional<T> max_v; // 8 -> 4
-  // std::unique_ptr<node_t<T>> summary; // 8 -> (0)
-  // std::vector<std::unique_ptr<node_t<T>>> cluster;  // TODO: optimize using hash table 24 -> 8
-  // std::unique_ptr<node_t<T>[]> cluster(n);
-  // 56 -> 16
-
+  // 16B
   T min_v;
   T max_v;
   std::unique_ptr<node_t<T>[]> A;  // [cluster[], summary]
@@ -43,8 +36,6 @@ struct node_t {
 template<typename T>
 class vEBTree {
  public:
-  // vEBTree() = default;
-  // explicit vEBTree(size_t u);
   vEBTree();
   ~vEBTree() = default;
 
@@ -52,20 +43,25 @@ class vEBTree {
   void insert(T x) {
     _ins(_root, x, MAX_BITS);
   }
-  // void remove(T x) { _del(_root, x, MAX_BITS); }
+  void remove(T x) { 
+    _del(_root, x, MAX_BITS); 
+  }
   bool find(T x) const {
     return _find(_root, x, MAX_BITS);
   }
   T successor(T x) const {
     return _succ(_root, x, MAX_BITS);
   }
-  // std::optional<T> predecessor(T x) const;
+  T predecessor(T x) const {
+    return _pred(_root, x, MAX_BITS);
+  }
 
  private:
   void _ins(node_t<T> &node, T x, size_t s);
-  // void _del(node_t<T> &node, T x, size_t s);
+  void _del(node_t<T> &node, T x, size_t s);
   bool _find(const node_t<T> &node, T x, size_t s) const;
   T _succ(const node_t<T> &node, T x, size_t s) const;
+  T _pred(const node_t<T> &node, T x, size_t s) const;
 
   inline std::pair<T, T> _split(T v, size_t s) const {
     T high = static_cast<T>(v / (1ULL << s));
