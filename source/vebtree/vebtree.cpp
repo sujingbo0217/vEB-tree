@@ -40,9 +40,19 @@ void vEBTree<T>::_ins(node_t<T> &node, T x, size_t s) {
 template<typename T>
 void vEBTree<T>::_del(node_t<T> &node, T x, size_t s) {
   if (node.min_v == NIL) return;
+  if (node.max_v == node.min_v) {
+    // only the last node
+    node.min_v = node.max_v = NIL;
+    return;
+  }
+  // base case (w 0 and 1 only)
+  if (s <= 1) {
+    node.max_v = node.min_v = (x ^ 1);
+    return;
+  }
   // if x is V.min (check if it's the last node in the cluster)
   if (x == node.min_v) {
-    // get the first next cluster id
+    // get the first cluster id
     T nxt = node.A[1ULL << (s / 2)].min_v;
     if (nxt == NIL) {
       // no nodes in cluster
@@ -64,7 +74,7 @@ void vEBTree<T>::_del(node_t<T> &node, T x, size_t s) {
   // if x is V.max (update V.max)
   if (x == node.max_v) {
     // get the last cluster id
-    auto last = node.A[1ULL << (s / 2)].max_v;
+    T last = node.A[1ULL << (s / 2)].max_v;
     if (last == NIL) {
       // delete the second last item (only one item left)
       node.max_v = node.min_v;
@@ -90,21 +100,19 @@ bool vEBTree<T>::_find(const node_t<T> &node, T x, size_t s) const {
 template<typename T>
 T vEBTree<T>::_succ(const node_t<T> &node, T x, size_t s) const {
   // lazy (V.min is not stored recursively)
-  if (node.min_v != NIL && x < node.min_v) return node.min_v;
-
+  if (node.min_v == NIL) return NIL;
+  if (x < node.min_v) return node.min_v;
   if (s <= 1) {
     if (x == 0 && node.max_v == 1) {
       return 1;
     }
     return NIL;
   }
-
   auto [high, low] = _split(x, s / 2);
   if (low < node.A[high].max_v) {
     low = _succ(node.A[high], low, s / 2);
     if (low != NIL) return _combine(high, low, s / 2);
   }
-
   high = _succ(node.A[1ULL << (s / 2)], high, s / 2);
   if (high == NIL) return NIL;  // larger than the last
   low = node.A[high].min_v;
@@ -114,20 +122,17 @@ T vEBTree<T>::_succ(const node_t<T> &node, T x, size_t s) const {
 template<typename T>
 T vEBTree<T>::_pred(const node_t<T> &node, T x, size_t s) const {
   if (node.max_v != NIL && x > node.max_v) return node.max_v;
-
   if (s <= 1) {
     if (x == 1 && node.min_v == 0) {
       return 0;
     }
     return NIL;
   }
-
   auto [high, low] = _split(x, s / 2);
   if (node.A[high].min_v != NIL && low > node.A[high].min_v) {
     low = _pred(node.A[high], low, s / 2);
     if (low != NIL) return _combine(high, low, s / 2);
   }
-
   high = _pred(node.A[1ULL << (s / 2)], high, s / 2);
   if (high == NIL) return NIL;
   low = node.A[high].max_v;
