@@ -69,7 +69,7 @@ class vEBTree {
     return std::make_pair(high, low);
   }
 
-  inline T _combine(T high, T low, size_t s) const {
+  inline T _concat(T high, T low, size_t s) const {
     return high * static_cast<T>(1ULL << s) + low;
   }
 

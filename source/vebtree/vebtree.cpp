@@ -39,7 +39,6 @@ void vEBTree<T>::_ins(node_t<T> &node, T x, size_t s) {
 
 template<typename T>
 void vEBTree<T>::_del(node_t<T> &node, T x, size_t s) {
-  if (node.min_v == NIL) return;
   if (node.max_v == node.min_v) {
     // only the last node
     node.min_v = node.max_v = NIL;
@@ -53,8 +52,8 @@ void vEBTree<T>::_del(node_t<T> &node, T x, size_t s) {
   // if x is V.min (check if it's the last node in the cluster)
   if (x == node.min_v) {
     // get the first cluster id
-    T nxt = node.A[1ULL << (s / 2)].min_v;
-    if (nxt == NIL) {
+    T next = node.A[1ULL << (s / 2)].min_v;
+    if (next == NIL) {
       // no nodes in cluster
       node.min_v = node.max_v = NIL;
       return;
@@ -62,7 +61,7 @@ void vEBTree<T>::_del(node_t<T> &node, T x, size_t s) {
     // not last node
     // delete old & update V.min
     // remove new V.min from recursive storage
-    x = node.min_v = _combine(nxt, node.A[nxt].min_v, s / 2);
+    x = node.min_v = _concat(next, node.A[next].min_v, s / 2);
   }
   // recursively delete
   auto [high, low] = _split(x, s / 2);
@@ -80,7 +79,7 @@ void vEBTree<T>::_del(node_t<T> &node, T x, size_t s) {
       node.max_v = node.min_v;
     } else {
       // find the last item in the cluster
-      node.max_v = _combine(last, node.A[last].max_v, s / 2);
+      node.max_v = _concat(last, node.A[last].max_v, s / 2);
     }
   }
 }
@@ -100,7 +99,6 @@ bool vEBTree<T>::_find(const node_t<T> &node, T x, size_t s) const {
 template<typename T>
 T vEBTree<T>::_succ(const node_t<T> &node, T x, size_t s) const {
   // lazy (V.min is not stored recursively)
-  if (node.min_v == NIL) return NIL;
   if (x < node.min_v) return node.min_v;
   if (s <= 1) {
     if (x == 0 && node.max_v == 1) {
@@ -111,12 +109,12 @@ T vEBTree<T>::_succ(const node_t<T> &node, T x, size_t s) const {
   auto [high, low] = _split(x, s / 2);
   if (low < node.A[high].max_v) {
     low = _succ(node.A[high], low, s / 2);
-    if (low != NIL) return _combine(high, low, s / 2);
+    if (low != NIL) return _concat(high, low, s / 2);
   }
   high = _succ(node.A[1ULL << (s / 2)], high, s / 2);
   if (high == NIL) return NIL;  // larger than the last
   low = node.A[high].min_v;
-  return _combine(high, low, s / 2);
+  return _concat(high, low, s / 2);
 }
 
 template<typename T>
@@ -131,12 +129,12 @@ T vEBTree<T>::_pred(const node_t<T> &node, T x, size_t s) const {
   auto [high, low] = _split(x, s / 2);
   if (node.A[high].min_v != NIL && low > node.A[high].min_v) {
     low = _pred(node.A[high], low, s / 2);
-    if (low != NIL) return _combine(high, low, s / 2);
+    if (low != NIL) return _concat(high, low, s / 2);
   }
   high = _pred(node.A[1ULL << (s / 2)], high, s / 2);
   if (high == NIL) return NIL;
   low = node.A[high].max_v;
-  return _combine(high, low, s / 2);
+  return _concat(high, low, s / 2);
 }
 
 template class vebtree::vEBTree<uint32_t>;  // Eval

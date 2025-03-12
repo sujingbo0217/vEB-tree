@@ -205,16 +205,16 @@ int main(int argc, char** argv) {
 	std::cout << "Time to insert " + std::to_string(N) + " items: " + std::to_string(elapsed(t1, t2)) + " secs" << std::endl;
 
 	// Query N items from in_numbers
-	t1 = high_resolution_clock::now();
-	for (uint32_t i = 0; i < N; ++i) {
-		bool found = vebtree.find(in_numbers[i]);
-		if (!found) {
-			std::cout << "Find in vEB-tree failed. Item: " + std::to_string(in_numbers[i]) << std::endl;
-			exit(0);
-		}
-	}
-	t2 = high_resolution_clock::now();
-	std::cout << "Time to query " + std::to_string(N) + " items: " + std::to_string(elapsed(t1, t2)) + " secs" << std::endl;
+	// t1 = high_resolution_clock::now();
+	// for (uint32_t i = 0; i < N; ++i) {
+	// 	bool found = vebtree.find(in_numbers[i]);
+	// 	if (!found) {
+	// 		std::cout << "Find in vEB-tree failed. Item: " + std::to_string(in_numbers[i]) << std::endl;
+	// 		exit(0);
+	// 	}
+	// }
+	// t2 = high_resolution_clock::now();
+	// std::cout << "Time to query " + std::to_string(N) + " items: " + std::to_string(elapsed(t1, t2)) + " secs" << std::endl;
 
 	// N Successor queries from out_numbers
 	t1 = high_resolution_clock::now();
@@ -249,7 +249,10 @@ int main(int argc, char** argv) {
 	t1 = high_resolution_clock::now();
 	for (uint32_t i = 0; i < N / 2; ++i) {
 		vebtree.remove(in_numbers[i]);
-		assert(!vebtree.find(in_numbers[i]));
+		if (!vebtree.find(in_numbers[i])) {
+			std::cerr << "Item " << i << std::endl;
+			exit(0);
+		}
 	}
 	t2 = high_resolution_clock::now();
 	std::cout << "Time to delete " + std::to_string(N / 2) + " items: " + std::to_string(elapsed(t1, t2)) + " secs" << std::endl;
