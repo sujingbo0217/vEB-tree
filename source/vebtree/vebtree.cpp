@@ -46,7 +46,7 @@ void vEBTree<T>::_del(node_t<T> &node, T x, size_t s) {
   }
   // base case (w 0 and 1 only)
   if (s <= 1) {
-    node.max_v = node.min_v = (x ^ 1);
+    node.max_v = node.min_v = (x == 0 ? 1 : 0);
     return;
   }
   // if x is V.min (check if it's the last node in the cluster)
@@ -54,8 +54,7 @@ void vEBTree<T>::_del(node_t<T> &node, T x, size_t s) {
     // get the first cluster id
     T next = node.A[1ULL << (s / 2)].min_v;
     if (next == NIL) {
-      // no nodes in cluster
-      node.min_v = node.max_v = NIL;
+      node.min_v = node.max_v;
       return;
     }
     // not last node
@@ -89,10 +88,7 @@ bool vEBTree<T>::_find(const node_t<T> &node, T x, size_t s) const {
   if (x == node.min_v || x == node.max_v) return true;
   if (s <= 1) return false;
   auto [high, low] = _split(x, s / 2);
-  if (node.A[high].min_v == NIL) {
-    // return _find(node.A[1ULL << (s / 2)], high, s / 2);
-    return false;
-  }
+  if (node.A[high].min_v == NIL) return false;
   return _find(node.A[high], low, s / 2);
 }
 

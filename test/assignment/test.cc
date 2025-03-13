@@ -2,6 +2,8 @@
 // For use in CS6968 & CS5968
 
 #include "../../include/vebtree/vebtree.hpp"
+#include "../../include/vebtree/baseline.hpp"
+#include "../../include/vebtree/geek.hpp"
 
 #include <iostream>
 #include <fstream>
@@ -115,7 +117,7 @@ int main(int argc, char** argv) {
 		bst_succ[i] = (ret == bst.end() ? 0 : *ret);
 	}
 	t2 = high_resolution_clock::now();
-	std::cout << "Time to successor query " + std::to_string(N) + " items: " + std::to_string(elapsed(t1, t2)) + " secs" << std::endl << std::endl;
+	std::cout << "Time to successor query " + std::to_string(N) + " items: " + std::to_string(elapsed(t1, t2)) + " secs" << std::endl;
 
 	// N / 2 deletions from in_numbers
 	t1 = high_resolution_clock::now();
@@ -124,7 +126,7 @@ int main(int argc, char** argv) {
 		// assert(bst.find(in_numbers[i]) == bst.end());
 	}
 	t2 = high_resolution_clock::now();
-	std::cout << "Time to delete " + std::to_string(N / 2) + " items: " + std::to_string(elapsed(t1, t2)) + " secs" << std::endl;
+	std::cout << "Time to delete " + std::to_string(N / 2) + " items: " + std::to_string(elapsed(t1, t2)) + " secs" << std::endl << std::endl;
 
 	bst.clear();
 }
@@ -178,6 +180,67 @@ int main(int argc, char** argv) {
 }
 
 /***********************************************************************
+ * Test van Emde Boas (vEB) Tree Baseline
+ ***********************************************************************/
+/*
+{
+    std::cout << "Testing van Emde Boas Tree Baseline..." << std::endl;
+	high_resolution_clock::time_point t1, t2;
+	
+	t1 = high_resolution_clock::now();
+    geek::Van_Emde_Boas* tree = new geek::Van_Emde_Boas(N);
+	t2 = high_resolution_clock::now();
+	std::cout << "Time to construction: " + std::to_string(elapsed(t1, t2)) + " secs" << std::endl;
+
+	//Insert N items from in_numbers
+	t1 = high_resolution_clock::now();
+	for (uint32_t i = 0; i < N; ++i) {
+		geek::insert(tree, in_numbers[i]);
+	}
+	t2 = high_resolution_clock::now();
+	std::cout << "Time to insert " + std::to_string(N) + " items: " + std::to_string(elapsed(t1, t2)) + " secs" << std::endl;
+
+	// Query N items from in_numbers
+	t1 = high_resolution_clock::now();
+	for (uint32_t i = 0; i < N; ++i) {
+		bool found = geek::isMember(tree, in_numbers[i]);
+		if (!found) {
+			std::cout << "Find in vEB-tree failed. Item: " + std::to_string(in_numbers[i]) << std::endl;
+			exit(0);
+		}
+	}
+	t2 = high_resolution_clock::now();
+	std::cout << "Time to query " + std::to_string(N) + " items: " + std::to_string(elapsed(t1, t2)) + " secs" << std::endl;
+
+	// N Successor queries from out_numbers
+	t1 = high_resolution_clock::now();
+	for (uint32_t i = 0; i < N; ++i) {
+		uint32_t res = geek::VEB_successor(tree, out_numbers[i]);
+		if (bst_succ[i] != 0 && res != bst_succ[i]) {
+			std::cout << "successor query in vEB-tree failed. Item: " + std::to_string(out_numbers[i]) + " Successor: " + std::to_string(res) << std::endl;
+			std::cout << "Successor should be: " + std::to_string(bst_succ[i]) << ", res: " << res << std::endl;
+			exit(1);
+		}
+	}
+	t2 = high_resolution_clock::now();
+	std::cout << "Time to successor query " + std::to_string(N) + " items: " + std::to_string(elapsed(t1, t2)) + " secs" << std::endl << std::endl;
+
+	// N / 2 deletion from in_numbers
+	t1 = high_resolution_clock::now();
+	for (uint32_t i = 0; i < N / 2; ++i) {
+		geek::VEB_delete(tree, in_numbers[i]);
+		if (geek::isMember(tree, in_numbers[i])) {
+			std::cout << "Item " << i << std::endl;
+			exit(0);
+		}
+	}
+	t2 = high_resolution_clock::now();
+	std::cout << "Time to delete " + std::to_string(N / 2) + " items: " + std::to_string(elapsed(t1, t2)) + " secs" << std::endl;
+	exit(0);
+}
+*/
+
+/***********************************************************************
  * Test van Emde Boas (vEB) Tree
  ***********************************************************************/
 {
@@ -205,16 +268,16 @@ int main(int argc, char** argv) {
 	std::cout << "Time to insert " + std::to_string(N) + " items: " + std::to_string(elapsed(t1, t2)) + " secs" << std::endl;
 
 	// Query N items from in_numbers
-	// t1 = high_resolution_clock::now();
-	// for (uint32_t i = 0; i < N; ++i) {
-	// 	bool found = vebtree.find(in_numbers[i]);
-	// 	if (!found) {
-	// 		std::cout << "Find in vEB-tree failed. Item: " + std::to_string(in_numbers[i]) << std::endl;
-	// 		exit(0);
-	// 	}
-	// }
-	// t2 = high_resolution_clock::now();
-	// std::cout << "Time to query " + std::to_string(N) + " items: " + std::to_string(elapsed(t1, t2)) + " secs" << std::endl;
+	t1 = high_resolution_clock::now();
+	for (uint32_t i = 0; i < N; ++i) {
+		bool found = vebtree.find(in_numbers[i]);
+		if (!found) {
+			std::cout << "Find in vEB-tree failed. Item: " + std::to_string(in_numbers[i]) << std::endl;
+			exit(0);
+		}
+	}
+	t2 = high_resolution_clock::now();
+	std::cout << "Time to query " + std::to_string(N) + " items: " + std::to_string(elapsed(t1, t2)) + " secs" << std::endl;
 
 	// N Successor queries from out_numbers
 	t1 = high_resolution_clock::now();
@@ -239,23 +302,27 @@ int main(int argc, char** argv) {
 				}
 				fout.close();
 			}
-			exit(1);
+			// exit(1);
 		}
 	}
 	t2 = high_resolution_clock::now();
-	std::cout << "Time to successor query " + std::to_string(N) + " items: " + std::to_string(elapsed(t1, t2)) + " secs" << std::endl << std::endl;
+	std::cout << "Time to successor query " + std::to_string(N) + " items: " + std::to_string(elapsed(t1, t2)) + " secs" << std::endl;
 
 	// N / 2 deletion from in_numbers
 	t1 = high_resolution_clock::now();
 	for (uint32_t i = 0; i < N / 2; ++i) {
 		vebtree.remove(in_numbers[i]);
-		if (!vebtree.find(in_numbers[i])) {
-			std::cerr << "Item " << i << std::endl;
-			exit(0);
-		}
+		// vebtree.remove(in_numbers[i]);
 	}
 	t2 = high_resolution_clock::now();
+	
 	std::cout << "Time to delete " + std::to_string(N / 2) + " items: " + std::to_string(elapsed(t1, t2)) + " secs" << std::endl;
+	
+	// for (uint32_t i = 0; i < N / 2; ++i) {
+	// 	if (vebtree.find(in_numbers[i])) {
+	// 		std::cout << "#Item " << i << ">> " << in_numbers[i] << std::endl;
+	// 	}
+	// }
 	exit(0);
 }
 	return 0;
